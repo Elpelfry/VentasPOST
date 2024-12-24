@@ -1,0 +1,89 @@
+@page "/account/identity/login"
+@inject IAccountClientService accountService
+@layout AuthenticationLayout
+
+<EditForm Model="@LoginModel" OnValidSubmit="@LoginAsync">
+    <div class="card border-primary shadow-lg text-dark p-3" style="width: 400px; opacity:0.8; margin-top:30%; border-radius:24px">
+        <h3 class="text-center text-primary mb-4">Iniciar Sesión</h3>
+        <DataAnnotationsValidator />
+        <div class="mb-3">
+            <label for="email" class="form-label text-start d-block fw-bold">Correo Electrónico</label>
+            <InputText id="email" class="form-control" @bind-Value="LoginModel.EmailAddress" placeholder="Ingresa tu correo" />
+            <ValidationMessage For="@(() => LoginModel.EmailAddress)" class="text-danger" />
+        </div>
+        <div class="mb-3">
+            <label for="password" class="form-label text-start d-block fw-bold">Contraseña</label>
+            <InputText id="password" type="@PasswordType" class="form-control" @bind-Value="LoginModel.Password" placeholder="Ingresa tu contraseña" />
+            <ValidationMessage For="@(() => LoginModel.Password)" class="text-danger" />
+        </div>
+        <div class="mb-3 text-end">
+            <a class="text-decoration-none" style="cursor: pointer;" @onclick="ChangePasswordType">
+                <small>@DisplayText</small>
+            </a>
+        </div>
+        <label class="text-danger">@Message</label>
+
+        <button type="submit" class="btn btn-primary w-100 mt-3">Iniciar Sesión</button>
+    </div>
+</EditForm>
+
+@code {
+    [CascadingParameter]
+    public Task<AuthenticationState>? ClientAuthState { get; set; }
+
+    private string? Message;
+    public LoginDTO LoginModel { get; set; } = new();
+
+    private string? PasswordType = "password";
+    private bool PasswordState = true;
+    private string DisplayText = "Show";
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            if ((await ClientAuthState!).User.Identity!.IsAuthenticated == true)
+                NavManager.NavigateTo("content/home", false, true);
+        }
+        catch { }
+    }
+
+    private async Task LoginAsync()
+    {
+        try
+        {
+            var response = await accountService.LoginAccountAsync(LoginModel);
+            if (response.Flag)
+            {
+                var customAuthStateProvider = (CustomAuthenticationStateProvider)AuthStateProvider;
+                await customAuthStateProvider.UpdateAuthenticationState(new LocalStorageDTO()
+                    { Token = response.Token, Refresh = response.RefreshToken });
+                NavManager.NavigateTo(uri: "content/home", true);
+            }
+            else
+            {
+                Message = response.Message;
+            }
+        }
+        catch
+        {
+            Message = "Sorry, unknown error occured";
+        }
+    }
+
+    void ChangePasswordType()
+    {
+        PasswordState = !PasswordState;
+        if (!PasswordState)
+        {
+            PasswordType = "text";
+            DisplayText = "Show";
+        }
+
+        else
+        {
+            DisplayText = "Hide";
+            PasswordType = "password";
+        }
+    }
+}
