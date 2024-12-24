@@ -1,0 +1,25 @@
+﻿@using System.Net.Http
+@using System.Net.Http.Json
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Routing
+@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.AspNetCore.Components.Web.Virtualization
+@using Microsoft.AspNetCore.Components.WebAssembly.Http
+@using Microsoft.JSInterop
+@using WebUI
+@using WebUI.Layout
+@using VentasPOST.ServiceClient.SecurityHandlers
+@using Microsoft.AspNetCore.Components.Authorization
+@using VentasPOST.Domain.DTOs.Response.Account
+@using VentasPOST.Domain
+@using VentasPOST.ServiceClient
+@using VentasPOST.Abstractions.Client
+@using WebUI.Layout.Account.Identity
+@using VentasPOST.Domain.DTOs.Request.Account
+@using Microsoft.AspNetCore.Authorization
+@using System.Security.Claims
+@using BlazorBootstrap
+
+@inject NavigationManager NavManager
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NotificationService ToastService
